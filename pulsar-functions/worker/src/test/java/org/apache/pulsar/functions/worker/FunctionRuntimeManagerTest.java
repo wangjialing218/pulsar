@@ -418,6 +418,14 @@ public class FunctionRuntimeManagerTest {
         assertEquals(functionRuntimeManager.workerIdToAssignments
                 .get("worker-1").get("test-tenant/test-namespace/func-2:0"), assignment4);
 
+        // increase parallelism and check the no instance should start since all instance are stopped
+        Function.Assignment assignment5 = Function.Assignment.newBuilder()
+                .setWorkerId("worker-1")
+                .setInstance(Function.Instance.newBuilder()
+                        .setFunctionMetaData(function2Stopped).setInstanceId(1).build())
+                .build();
+        functionRuntimeManager.processAssignment(assignment5);
+        verify(functionActioner, times(0)).startFunction(any(FunctionRuntimeInfo.class));
     }
 
     @Test

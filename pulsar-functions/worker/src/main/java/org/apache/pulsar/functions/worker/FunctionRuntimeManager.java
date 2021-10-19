@@ -948,8 +948,15 @@ public class FunctionRuntimeManager implements AutoCloseable{
                     }
                 }
             } else {
-                if (functionMetaData.getInstanceStatesOrDefault(assignment.getInstance().getInstanceId(), Function.FunctionState.RUNNING) == Function.FunctionState.RUNNING) {
-                    toStart = true;
+                Map<Integer, Function.FunctionState> instanceStatesMap = functionMetaData.getInstanceStatesMap();
+                int instanceId = assignment.getInstance().getInstanceId();
+                if (instanceStatesMap.containsKey(instanceId)) {
+                    toStart = instanceStatesMap.get(instanceId) == Function.FunctionState.RUNNING;
+                } else {
+                    // Do not start instance when all instances in map are stopped
+                    toStart = instanceStatesMap.isEmpty() || instanceStatesMap.values().stream().anyMatch(
+                            functionState -> functionState == Function.FunctionState.RUNNING
+                    );
                 }
             }
         }
